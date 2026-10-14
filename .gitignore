@@ -10,3 +10,7 @@ js/firebase-config.js
 design*.md
 .firebase/
 node_modules/
+
+# 이미지 생성 작업 파일(이 PC 경로 포함)
+docs/image-generation-log.json
+docs/prepare-images.py
