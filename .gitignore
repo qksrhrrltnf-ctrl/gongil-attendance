@@ -1,0 +1,12 @@
+# 학생 실명이 든 파일 — 절대 업로드하지 않는다
+js/roster.local.js
+private/
+
+# Firebase 비밀 설정
+js/firebase-config.js
+
+# 로컬 도구·참고 자료
+.claude/
+design*.md
+.firebase/
+node_modules/

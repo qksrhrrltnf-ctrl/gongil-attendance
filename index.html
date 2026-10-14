@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#F1EBDE">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="공학일반 출석">
+  <title>공학 일반 출석부</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar halftone">
+      <div class="brand">
+        <img class="slot slot-mascot" src="assets/img/header-mascot.png" alt="" data-fallback="⚙️">
+        <div>
+          <h1>공학 일반 출석부</h1>
+          <p class="sub" id="storeLabel">이 기기에 저장</p>
+        </div>
+      </div>
+      <button class="icon-btn" id="todayBtn" aria-label="오늘로 이동">오늘</button>
+    </header>
+
+    <!-- 출석부 -->
+    <main class="view" id="view-roll">
+      <div class="seg" role="tablist" id="sectionTabs"></div>
+
+      <div class="picker card">
+        <button class="arrow" id="prevDay" aria-label="이전 날">◀</button>
+        <label class="date-wrap">
+          <input type="date" id="dateInput">
+          <span id="dateLabel"></span>
+        </label>
+        <button class="arrow" id="nextDay" aria-label="다음 날">▶</button>
+      </div>
+
+      <div class="periods" id="periodChips"></div>
+
+      <div class="session-bar" id="sessionBar"></div>
+
+      <ul class="grid" id="studentGrid"></ul>
+
+      <p class="hint">카드를 누르면 <b>출석 → 지각 → 결과</b> 순으로 바뀝니다. 길게 누르면 사유와 다른 상태를 고릅니다.</p>
+    </main>
+
+    <!-- 통계 -->
+    <main class="view" id="view-stats" hidden>
+      <div class="seg" role="tablist" id="statsTabs"></div>
+      <div class="card stat-head" id="statsSummary"></div>
+      <div class="card table-card">
+        <table class="stats" id="statsTable"></table>
+      </div>
+    </main>
+
+    <!-- 내보내기 -->
+    <main class="view" id="view-export" hidden>
+      <div class="hero card halftone">
+        <img class="slot slot-hero" src="assets/img/export-hero.png" alt="" data-fallback="📤">
+        <div>
+          <h2>기록 내보내기</h2>
+          <p>엑셀에서 바로 열리는 CSV 파일로 받습니다.</p>
+        </div>
+      </div>
+      <div class="card form">
+        <label>분반
+          <select id="exSection"></select>
+        </label>
+        <div class="row2">
+          <label>시작일 <input type="date" id="exFrom"></label>
+          <label>종료일 <input type="date" id="exTo"></label>
+        </div>
+        <button class="btn primary" id="exportCsv">CSV 내려받기</button>
+      </div>
+      <div class="card form">
+        <h3>백업과 복원</h3>
+        <p class="muted">기기를 바꾸거나 브라우저 데이터를 지우기 전에 백업 파일을 받아 두십시오.</p>
+        <button class="btn" id="backupBtn">백업 파일 저장</button>
+        <label class="btn file-btn">백업 파일 불러오기
+          <input type="file" id="restoreInput" accept="application/json,.json" hidden>
+        </label>
+      </div>
+    </main>
+
+    <!-- 설정 -->
+    <main class="view" id="view-settings" hidden>
+      <div class="card form">
+        <h3>주간 시간표</h3>
+        <p class="muted">수업이 있는 칸에 분반을 지정하면, 앱을 열 때 현재 교시가 자동으로 선택됩니다.</p>
+        <div class="tt-wrap"><table class="tt" id="ttTable"></table></div>
+      </div>
+      <div class="card form">
+        <h3>교시 시간</h3>
+        <div id="bellList" class="bells"></div>
+      </div>
+      <div class="card form">
+        <h3>명렬표</h3>
+        <div class="seg small" id="rosterTabs"></div>
+        <ul class="roster" id="rosterList"></ul>
+        <div class="row2">
+          <input id="newNo" inputmode="numeric" placeholder="학번 (예: 30130)">
+          <input id="newName" placeholder="이름">
+        </div>
+        <button class="btn" id="addStudent">학생 추가</button>
+        <button class="btn" id="clearSection">이 분반 학생 모두 빼기</button>
+        <details>
+          <summary>엑셀에서 여러 명 붙여넣기</summary>
+          <p class="muted">한 줄에 한 명씩 <code>학번 이름</code> 순서로 붙여넣으십시오. 지금 선택한 분반에 들어갑니다.</p>
+          <textarea id="bulkText" rows="5" placeholder="30130	홍길동"></textarea>
+          <button class="btn" id="bulkAdd">일괄 추가</button>
+        </details>
+      </div>
+      <div class="card form danger-zone">
+        <h3>초기화</h3>
+        <p class="muted">모든 출결 기록을 지우고 처음 명렬표로 되돌립니다.</p>
+        <button class="btn danger" id="resetAll">전체 초기화</button>
+      </div>
+    </main>
+
+    <nav class="tabbar" id="tabbar">
+      <button data-view="roll" class="on"><span>✓</span>출석부</button>
+      <button data-view="stats"><span>▦</span>통계</button>
+      <button data-view="export"><span>⇩</span>내보내기</button>
+      <button data-view="settings"><span>⚙</span>설정</button>
+    </nav>
+  </div>
+
+  <!-- 상태 선택 시트 -->
+  <div class="sheet-backdrop" id="sheet" hidden>
+    <div class="sheet card" role="dialog" aria-modal="true" aria-labelledby="sheetTitle">
+      <div class="sheet-handle"></div>
+      <h3 id="sheetTitle"></h3>
+      <p class="label">상태</p>
+      <div class="choices" id="typeChoices"></div>
+      <p class="label" id="reasonLabel">사유</p>
+      <div class="choices" id="reasonChoices"></div>
+      <input id="noteInput" placeholder="메모 (선택)">
+      <div class="row2">
+        <button class="btn" id="sheetCancel">닫기</button>
+        <button class="btn primary" id="sheetSave">저장</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 학생 이력 -->
+  <div class="sheet-backdrop" id="history" hidden>
+    <div class="sheet card" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+      <div class="sheet-handle"></div>
+      <h3 id="historyTitle"></h3>
+      <ul class="history" id="historyList"></ul>
+      <button class="btn" id="historyClose">닫기</button>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="js/roster.js"></script>
+  <!-- 실명 명렬표(이 PC 전용, 업로드 제외). 없으면 가명 명렬표를 쓴다 -->
+  <script src="js/roster.local.js"></script>
+  <script src="js/store.js"></script>
+  <!-- Firebase 연결 시 주석 해제 (js/firebase-store.js 참고)
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+  <script src="js/firebase-config.js"></script>
+  <script src="js/firebase-store.js"></script>
+  -->
+  <script src="js/app.js"></script>
+</body>
+</html>
